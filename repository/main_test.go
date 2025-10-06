@@ -8,11 +8,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/dreamsofcode-io/testcontainers/database"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/wait"
-
-	"github.com/dreamsofcode-io/testcontainers/database"
 )
 
 var connURL = ""
@@ -22,8 +21,8 @@ var sleepTime = time.Millisecond * 500
 func TestMain(m *testing.M) {
 	ctx := context.Background()
 
-	container, err := postgres.RunContainer(ctx,
-		testcontainers.WithImage("postgres:16"),
+	container, err := postgres.Run(ctx,
+		"postgres:17-alpine",
 		postgres.WithDatabase("testdb"),
 		postgres.WithUsername("user"),
 		postgres.WithPassword("foobar"),

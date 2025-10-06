@@ -10,7 +10,7 @@ require (
 	github.com/segmentio/kafka-go v0.4.47
 	github.com/stretchr/testify v1.10.0
 	github.com/testcontainers/testcontainers-go v0.39.0
-	github.com/testcontainers/testcontainers-go/modules/kafka v0.30.0
+	github.com/testcontainers/testcontainers-go/modules/kafka v0.39.0
 	github.com/testcontainers/testcontainers-go/modules/postgres v0.39.0
 )
 

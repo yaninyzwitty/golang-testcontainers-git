@@ -17,7 +17,8 @@ import (
 func TestPubSub(t *testing.T) {
 	ctx := context.Background()
 
-	container, err := kfka.RunContainer(ctx,
+	container, err := kfka.Run(ctx,
+		"confluentinc/confluent-local:7.5.0",
 		kfka.WithClusterID("test-cluster"),
 		testcontainers.WithImage("confluentinc/confluent-local:7.5.0"),
 		testcontainers.WithEnv(map[string]string{
@@ -31,15 +32,27 @@ func TestPubSub(t *testing.T) {
 		log.Fatalf("failed to start container: %s", err)
 	}
 
-	endpoint, err := container.PortEndpoint(ctx, "9093/tcp", "")
+	brokers, err := container.Brokers(ctx)
 	if err != nil {
-		log.Fatalf("failed to get endpoint: %s", err)
+		log.Fatalf("failed to retrieve broker connection string %s", err)
 	}
 
-	conn, err := kafka.DialLeader(ctx, "tcp", endpoint, "test-topic", 0)
+	brokerAddr := brokers[0]
+	log.Println("Kafka broker:", brokerAddr)
+
+	// Create a topic for testing
+	topic := "test-topic"
+	partition := 0
+	conn, err := kafka.DialLeader(ctx, "tcp", brokerAddr, topic, partition)
 	if err != nil {
-		log.Fatalf("failed to dial leader: %s", err)
+		log.Fatalf("failed to dial leader: %v", err)
+
 	}
+	defer func() {
+		if err := conn.Close(); err != nil {
+			log.Printf("warning: failed to close connection: %v", err)
+		}
+	}()
 
 	t.Run("single message", func(t *testing.T) {
 		ps := pubsub.New(conn)

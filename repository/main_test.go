@@ -19,7 +19,7 @@ import (
 
 var connURL = ""
 var connectionHost = ""
-var parrallel = false
+var parallel = false
 var sleepTime = time.Millisecond * 500
 
 func TestMain(m *testing.M) {
@@ -97,7 +97,7 @@ func cleanup() {
 }
 
 func checkParallel(t *testing.T) {
-	if parrallel {
+	if parallel {
 		t.Parallel()
 	}
 }

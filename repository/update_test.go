@@ -34,7 +34,7 @@ func TestUpdate(t *testing.T) {
 		_, err = conn.ExecContext(
 			ctx,
 			"INSERT INTO spell (id, name, mana, damage, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $5)",
-			"41fca60e-9b26-4196-9b18-d4a79b350523kd",
+			"41fca60e-9b26-4196-9b18-d4a79b350523",
 			"bar",
 			70,
 			800,

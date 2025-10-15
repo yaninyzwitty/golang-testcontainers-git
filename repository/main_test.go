@@ -5,21 +5,48 @@ import (
 	"database/sql"
 	"log"
 	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
 	"github.com/dreamsofcode-io/testcontainers/database"
+	"github.com/gocql/gocql"
 	"github.com/testcontainers/testcontainers-go"
+	"github.com/testcontainers/testcontainers-go/modules/cassandra"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/wait"
 )
 
 var connURL = ""
+var connectionHost = ""
 var parrallel = false
 var sleepTime = time.Millisecond * 500
 
 func TestMain(m *testing.M) {
 	ctx := context.Background()
+
+	cassandraContainer, err := cassandra.Run(ctx,
+		"cassandra:4.1.3",
+		cassandra.WithInitScripts(filepath.Join("testdata", "init.cql")),
+		cassandra.WithConfigFile(filepath.Join("testdata", "init.yaml")),
+	)
+
+	defer func() {
+		if err := testcontainers.TerminateContainer(cassandraContainer); err != nil {
+			log.Printf("failed to terminate container: %s", err)
+		}
+	}()
+
+	if err != nil {
+		log.Printf("failed to start container: %s", err)
+		return
+	}
+
+	connectionHost, err = cassandraContainer.ConnectionHost(ctx)
+	if err != nil {
+		log.Printf("failed to get connection host: %s", err)
+		return
+	}
 
 	container, err := postgres.Run(ctx,
 		"postgres:17-alpine",
@@ -55,6 +82,9 @@ func TestMain(m *testing.M) {
 
 func getConnection(ctx context.Context) (*sql.DB, error) {
 	return database.Connect(connURL)
+}
+func getCassandraConnection(ctx context.Context) (*gocql.Session, error) {
+	return database.ConnectCassandra(connectionHost)
 }
 
 func cleanup() {
